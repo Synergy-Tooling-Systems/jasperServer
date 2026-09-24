@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies xmlns="http://jasperreports.sourceforge.net/jasperreports/fonts"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/fonts http://jasperreports.sourceforge.net/xsd/fonts.xsd">
+    <fontFamily name="SynergySansSerif">
+        <normal>fonts/synergysansserif/SansSerif.ttf</normal>
+        <bold>fonts/synergysansserif/SansSerif_Bold.ttf</bold>
+        <italic>fonts/synergysansserif/SansSerif_Italic.ttf</italic>
+        <boldItalic>fonts/synergysansserif/SansSerif_BoldItalic.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+</fontFamilies>

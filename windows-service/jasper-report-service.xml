@@ -1,0 +1,27 @@
+<service>
+  <id>jasper-report-service</id>
+  <name>Jasper Report Service</name>
+  <description>Spring Boot service that compiles and renders JasperReports .jrxml files to PDF.</description>
+
+  <!-- If "java" isn't on PATH for the account running the service (e.g. LocalSystem),
+       replace this with the full path, e.g. C:\Program Files\Java\jdk-21\bin\java.exe -->
+  <executable>java</executable>
+  <arguments>-jar "%BASE%\jasper-report-service.jar"</arguments>
+
+  <!-- The API listens on port 8080 unless config\service.properties sets
+       server.port. To set it here instead, append the argument above, e.g.
+       -jar "%BASE%\jasper-report-service.jar" --server.port=9090 -->
+
+  <!-- %BASE% = the directory this xml/exe live in. application.properties reads
+       reports.directory, config/db.properties and config/service.properties
+       relative to this working directory. -->
+  <workingdirectory>%BASE%</workingdirectory>
+
+  <log mode="roll-daily">
+    <logpath>%BASE%\logs</logpath>
+  </log>
+
+  <onfailure action="restart" delay="10 sec"/>
+  <startmode>Automatic</startmode>
+  <stopparentprocessfirst>true</stopparentprocessfirst>
+</service>

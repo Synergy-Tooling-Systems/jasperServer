@@ -1,0 +1,13 @@
+# Copy this file to service.properties (same directory) to change runtime
+# settings without rebuilding the jar. service.properties is gitignored so each
+# machine keeps its own values; it is read automatically at startup (see
+# spring.config.import in application.properties).
+#
+# The whole file is optional - if it is absent, the defaults shown below apply.
+
+# Port the HTTP API listens on.
+server.port=8080
+
+# Directory .jrxml report files are read from, relative to the working
+# directory the service is started from.
+#reports.directory=./reports

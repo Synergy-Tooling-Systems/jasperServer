@@ -1,0 +1,17 @@
+# Copy this file to db.properties (same directory) and fill in real values.
+# db.properties is gitignored so credentials never get committed; it is read
+# automatically at startup (see spring.config.import in application.properties).
+#
+# This file is required. Without it the app fails to start with "Failed to
+# configure a DataSource: 'url' attribute is not specified". A reachable server
+# is needed as well: every render opens a connection, including reports that
+# have no <queryString>.
+
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=MyReportingDb;encrypt=true;trustServerCertificate=true
+spring.datasource.username=report_user
+spring.datasource.password=change-me
+
+# Optional Hikari connection pool tuning
+#spring.datasource.hikari.maximum-pool-size=10
+#spring.datasource.hikari.connection-timeout=30000

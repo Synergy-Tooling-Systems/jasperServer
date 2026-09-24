@@ -1,0 +1,50 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Local secrets ###
+# Real DB credentials; config/db.properties.example is the tracked template.
+config/db.properties
+
+### Local settings ###
+# Per-machine port/paths; config/service.properties.example is the tracked template.
+config/service.properties
+
+### Windows service distribution ###
+dist/
+windows-service/*.exe
+windows-service/logs/
+windows-service/*.wrapper.log
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Reports ###
+reports/
