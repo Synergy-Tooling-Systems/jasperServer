@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Synergy-Tooling-Systems/jasperServer/docs/api/render-report-request.schema.json",
+  "title": "RenderReportRequest",
+  "description": "Request body for POST /api/reports/render. The service renders a .jrxml report from its configured reports directory and returns a PDF. Unknown top-level properties are ignored by the server, but are not part of the contract, so this schema rejects them.",
+  "type": "object",
+  "required": ["reportFileName"],
+  "additionalProperties": false,
+  "properties": {
+    "reportFileName": {
+      "type": "string",
+      "description": "Path of a .jrxml file relative to the service's reports directory. Use forward slashes for subdirectories (e.g. \"purchasing/PurchaseOrder.jrxml\"). Must end in .jrxml (the server's extension check ignores case). Backslashes and '..' segments are rejected: the resolved file must stay inside the reports directory.",
+      "minLength": 7,
+      "pattern": "^(?![/.])(?!.*\\.\\.)[^\\\\]+\\.[jJ][rR][xX][mM][lL]$",
+      "examples": ["po.jrxml", "purchasing/PurchaseOrder.jrxml", "inventory/Tags.jrxml"]
+    },
+    "parameters": {
+      "type": "array",
+      "description": "Report parameters. Each array entry is an object holding one report parameter name and its value; the entries are merged into a single parameter map in order, so a name repeated in a later entry wins. Omit the property (or pass an empty array) when the report needs no parameters. Parameter names not declared by the report are ignored. A JSON value's type must match the class the report declares for that parameter exactly - the service performs no type conversion.",
+      "items": {
+        "type": "object",
+        "description": "One {parameterName: parameterValue} pair. The server also accepts several pairs in one object, but the canonical form is one pair per entry.",
+        "minProperties": 1,
+        "propertyNames": {
+          "minLength": 1,
+          "description": "A parameter name as declared by <parameter name=\"...\"> in the .jrxml report."
+        },
+        "additionalProperties": {
+          "description": "The parameter value. A JSON string maps to java.lang.String, an integer within int range to java.lang.Integer, a larger integer to java.lang.Long, a decimal to java.lang.Double, true/false to java.lang.Boolean, an array to java.util.ArrayList and an object to java.util.LinkedHashMap. Dates cannot be passed: no JSON type maps to java.util.Date. null is allowed and suppresses the report's own default value for that parameter.",
+          "type": ["string", "number", "integer", "boolean", "object", "array", "null"]
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "reportFileName": "po.jrxml"
+    },
+    {
+      "reportFileName": "purchasing/PurchaseOrder.jrxml",
+      "parameters": [
+        { "poNumber": "PO-10432" },
+        { "copies": 2 },
+        { "includePrices": true }
+      ]
+    }
+  ]
+}

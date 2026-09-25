@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Synergy-Tooling-Systems/jasperServer/docs/api/error-response.schema.json",
+  "title": "ErrorResponse",
+  "description": "Body returned with Content-Type: application/json when a render request is rejected by the service itself. Requests rejected before they reach the endpoint (malformed JSON, wrong Content-Type, wrong method, unknown path) get an empty body instead, so a client must not assume every non-200 response carries this shape.",
+  "type": "object",
+  "required": ["timestamp", "status", "error", "message"],
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Instant the error was produced, in UTC ISO-8601 form.",
+      "examples": ["2026-09-25T14:38:18.856060800Z"]
+    },
+    "status": {
+      "type": "integer",
+      "description": "HTTP status code, repeated in the body.",
+      "enum": [400]
+    },
+    "error": {
+      "type": "string",
+      "description": "HTTP status reason phrase.",
+      "examples": ["Bad Request"]
+    },
+    "message": {
+      "type": "string",
+      "description": "What went wrong, safe to show to a user or to act on. Stable prefixes: 'reportFileName is required', 'reportFileName must have a .jrxml extension', 'Report file not found: ', 'Invalid reportFileName: ', 'Subreport not found in the reports directory: ', 'Subreport cycle: ', 'Failed to read report file: ', 'Failed to obtain a database connection for the report: ', 'Failed to compile or render the report: '.",
+      "examples": [
+        "reportFileName must have a .jrxml extension",
+        "Report file not found: po.jrxml",
+        "Failed to compile or render the report: Error evaluating expression for source text: $P{pInt} + 1"
+      ]
+    }
+  },
+  "examples": [
+    {
+      "timestamp": "2026-09-25T14:38:18.856060800Z",
+      "status": 400,
+      "error": "Bad Request",
+      "message": "Report file not found: does-not-exist.jrxml"
+    }
+  ]
+}
