@@ -30,7 +30,7 @@ Uses [WinSW](https://github.com/winsw/winsw) to wrap the executable jar as a Win
 
 This registers and starts the "Jasper Report Service" service, set to start
 automatically on boot and restart 10s after a crash. Logs roll daily into
-`logs\` in the same folder.
+`logs\` in the same folder, and are zipped after 30 days.
 
 ## Updating
 

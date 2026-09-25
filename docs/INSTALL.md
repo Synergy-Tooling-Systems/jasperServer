@@ -120,7 +120,7 @@ sudo dnf install java-21-openjdk-headless     # RHEL / Rocky / Alma
    This registers the **Jasper Report Service** service using the bundled
    [WinSW](https://github.com/winsw/winsw) wrapper, starts it, and sets it to
    start on boot and restart 10 seconds after a crash. Logs roll daily into a
-   `logs` subfolder.
+   `logs` subfolder, where they are zipped after 30 days.
 
    If PowerShell refuses to run the script, allow it for that window only:
 
@@ -236,7 +236,7 @@ on its own.
 | `config/service.properties` | Port and other runtime settings. Optional; never overwritten by an upgrade. |
 | `reports/` | Your `.jrxml` templates. Never overwritten by an upgrade. |
 | `VERSION` | The version installed. |
-| `logs/` (Windows only) | Service logs, rolled daily. |
+| `logs/` (Windows only) | Service logs, rolled daily and zipped after 30 days. |
 
 On Linux the logs go to the journal instead:
 

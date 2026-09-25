@@ -8,6 +8,9 @@ Run this from an elevated PowerShell, from inside a prepared dist folder
   jasper-report-service.jar
   reports\
   config\db.properties
+
+Safe to re-run: if the service is already registered its configuration is
+refreshed from jasper-report-service.xml instead of failing.
 #>
 
 $ErrorActionPreference = "Stop"
@@ -23,6 +26,17 @@ if (-not (Test-Path ".\jasper-report-service.jar")) {
     exit 1
 }
 
-& ".\jasper-report-service.exe" install
+$existing = Get-Service jasper-report-service -ErrorAction SilentlyContinue
+if ($existing) {
+    Write-Host "Service already registered; refreshing configuration from jasper-report-service.xml." -ForegroundColor Yellow
+    if ($existing.Status -ne "Stopped") {
+        Stop-Service jasper-report-service
+    }
+    & ".\jasper-report-service.exe" refresh
+} else {
+    & ".\jasper-report-service.exe" install
+}
+if ($LASTEXITCODE -ne 0) { throw "WinSW exited with code $LASTEXITCODE" }
+
 Start-Service jasper-report-service
 Get-Service jasper-report-service

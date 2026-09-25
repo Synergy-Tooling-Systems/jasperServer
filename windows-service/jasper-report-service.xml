@@ -9,16 +9,24 @@
   <arguments>-jar "%BASE%\jasper-report-service.jar"</arguments>
 
   <!-- The API listens on port 8080 unless config\service.properties sets
-       server.port. To set it here instead, append the argument above, e.g.
-       -jar "%BASE%\jasper-report-service.jar" --server.port=9090 -->
+       server.port. To set it here instead, pass it as a system property in
+       the arguments above, before -jar, e.g.
+       -Dserver.port=9090 -jar "%BASE%\jasper-report-service.jar" -->
 
   <!-- %BASE% = the directory this xml/exe live in. application.properties reads
        reports.directory, config/db.properties and config/service.properties
        relative to this working directory. -->
   <workingdirectory>%BASE%</workingdirectory>
 
-  <log mode="roll-daily">
+  <!-- Rolls at midnight, and sooner if the current file passes 10 MB.
+       Rolled files are named jasper-report-service.out.yyyyMMdd.log and
+       zipped once they are older than 30 days. -->
+  <log mode="roll-by-size-time">
     <logpath>%BASE%\logs</logpath>
+    <sizeThreshold>10240</sizeThreshold>
+    <pattern>yyyyMMdd</pattern>
+    <autoRollAtTime>00:00:00</autoRollAtTime>
+    <zipOlderThanNumDays>30</zipOlderThanNumDays>
   </log>
 
   <onfailure action="restart" delay="10 sec"/>

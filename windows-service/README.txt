@@ -100,7 +100,7 @@ Installation
    server allows connections from this machine.
 
    Logs are written to the logs\ subfolder (created on first start),
-   rolled daily.
+   rolled daily and zipped after 30 days.
 
 Updating to a new version
 --------------------------
