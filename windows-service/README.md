@@ -2,6 +2,13 @@
 
 Uses [WinSW](https://github.com/winsw/winsw) to wrap the executable jar as a Windows Service.
 
+> **Installing on a server?** Use the published release package instead of
+> building it yourself: download `jasper-report-service-<version>-windows.zip`
+> from the [Releases page](https://github.com/Synergy-Tooling-Systems/jasperServer/releases)
+> and follow [docs/INSTALL.md](../docs/INSTALL.md). It is the same layout as
+> `dist\` below, with WinSW already bundled. The steps here are for assembling
+> that folder by hand from a working copy.
+
 ## One-time setup on the target server
 
 1. From the project root, run `.\build-dist.ps1`. This builds the jar and assembles

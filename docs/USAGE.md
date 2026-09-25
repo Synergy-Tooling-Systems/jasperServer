@@ -2,6 +2,8 @@
 
 A small Spring Boot service that compiles a [JasperReports](https://jasperreports.sourceforge.net/) `.jrxml` report definition from the local `reports` directory and renders it to PDF against a SQL Server database.
 
+This page covers running the service from source and calling its API. To install a released build on a server, see [INSTALL.md](INSTALL.md); to publish a new release, see [RELEASING.md](RELEASING.md).
+
 ## Requirements
 
 - Java 21

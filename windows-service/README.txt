@@ -7,14 +7,20 @@ It contains everything needed to run it as a Windows Service.
 Contents
 --------
   jasper-report-service.jar          the application
+  jasper-report-service.exe          WinSW, the Windows service wrapper
+                                     (included in the release package; see
+                                     step 4 if it is missing)
   jasper-report-service.xml          Windows service configuration (WinSW)
   install-service.ps1                installs and starts the service
   uninstall-service.ps1              stops and removes the service
   reports\                           .jrxml report files served by the app
+                                     (ships empty - see reports\README.txt)
   config\db.properties.example       template for the database connection
                                      (required - see step 2)
   config\service.properties.example  template for the API port and other
                                      runtime settings
+  VERSION                            the version in this package
+  third-party\                       WinSW's license
 
 Prerequisites
 -------------
@@ -34,6 +40,11 @@ Installation
 1. Copy this entire folder to the server, e.g.:
        C:\Services\jasper-report-service
 
+   If you downloaded the .zip, unblock it before extracting - Windows
+   otherwise marks the extracted .ps1 files as coming from the internet
+   and refuses to run them:
+       Unblock-File .\jasper-report-service-<version>-windows.zip
+
 2. Configure the database connection (required):
    - Copy config\db.properties.example to config\db.properties
    - Edit config\db.properties and fill in the real SQL Server host,
@@ -51,21 +62,35 @@ Installation
    - This file is read at startup and is not touched by jar upgrades,
      so the port survives an update of the service.
 
-4. Download WinSW (the Windows service wrapper this app uses):
+4. Check that jasper-report-service.exe is in this folder.
+
+   The release package downloaded from GitHub already includes it, and
+   there is nothing to do here. It is only missing if this folder was
+   assembled locally with build-dist.ps1, in which case download WinSW
+   from:
        https://github.com/winsw/winsw/releases
-   Download the .NET Framework or .NET Core build matching what is
-   installed on the server, and save it into this same folder, renamed
-   to exactly:
+   and save it into this folder renamed to exactly:
        jasper-report-service.exe
 
-5. Open PowerShell as Administrator, change into this folder, and run:
+   The bundled build is WinSW.NET461.exe, which needs the .NET
+   Framework 4.6.1 that ships with Windows Server 2016 and Windows 10
+   1607 and later. On an older server, replace it with WinSW-x64.exe
+   from the same release - that build is self-contained and needs no
+   .NET Framework.
+
+5. Add your report templates:
+   - Copy your .jrxml files into the reports\ subfolder. The package
+     ships it empty; report templates are maintained separately from
+     the application. See reports\README.txt.
+
+6. Open PowerShell as Administrator, change into this folder, and run:
        .\install-service.ps1
 
    This registers the "Jasper Report Service" Windows Service, starts
    it immediately, and sets it to start automatically on boot and
    restart automatically 10 seconds after a crash.
 
-6. Verify it's running. On the default port 8080 (use the port from
+7. Verify it's running. On the default port 8080 (use the port from
    config\service.properties if you changed it):
        curl http://localhost:8080/actuator/health
 
@@ -81,17 +106,29 @@ Updating to a new version
 --------------------------
 1. Stop the service:
        Stop-Service jasper-report-service
-2. Replace jasper-report-service.jar with the new build.
+2. Replace jasper-report-service.jar with the new build, and copy the
+   new VERSION file alongside it.
 3. Start it again:
        Start-Service jasper-report-service
+
+Leave config\ and reports\ alone - they are not part of the upgrade.
 
 Uninstalling
 ------------
 Open PowerShell as Administrator in this folder and run:
     .\uninstall-service.ps1
 
+This removes the service but leaves the folder, including
+config\db.properties and reports\, in place. Delete the folder by hand
+to remove those as well.
+
 Troubleshooting
 ---------------
+- ".\install-service.ps1 cannot be loaded because running scripts is
+  disabled on this system": PowerShell's execution policy is blocking
+  it. In the same elevated window, run:
+      Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  then run the script again.
 - "java is not recognized": the account running the service (often
   Local System) does not have java on its PATH. Edit
   jasper-report-service.xml and change the <executable> line to the
@@ -105,6 +142,8 @@ Troubleshooting
   report": the settings in config\db.properties are wrong, or SQL
   Server is not reachable from this machine. This affects every
   report, not only the ones with a <queryString>.
+- Renders fail with "Report file not found": the .jrxml is not in the
+  reports\ subfolder of this folder. See step 5.
 - Reports directory, config\db.properties and config\service.properties
   are read relative to this folder (the service's working directory) -
   do not move the jar out of this folder on its own.

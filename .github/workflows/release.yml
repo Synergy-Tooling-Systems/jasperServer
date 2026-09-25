@@ -1,0 +1,160 @@
+# Builds the installable distribution packages for a release.
+#
+# Fires when a tag like v1.2.3 is pushed. GitHub cannot filter tag pushes by
+# branch, so the "Verify the tag is on main" step below enforces that: a tag on
+# a commit that is not an ancestor of main fails the run before anything is
+# built or published.
+#
+# Produces, and attaches to a GitHub Release for the tag:
+#   jasper-report-service-<version>-windows.zip    Windows Service package (WinSW bundled)
+#   jasper-report-service-<version>-linux.tar.gz   Linux systemd package
+#   SHA256SUMS.txt                                 checksums for both
+#
+# See docs/RELEASING.md for how to cut a release and docs/INSTALL.md for what
+# the person installing the package does with it.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Manual runs build and upload the packages as workflow artifacts only; they
+  # never create or touch a GitHub Release. Useful for dry-running a change to
+  # this workflow without burning a tag.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to stamp the package with, without the leading v (e.g. 1.2.3)'
+        required: true
+        default: '0.0.0-dev'
+
+permissions:
+  contents: write
+
+env:
+  # WinSW (https://github.com/winsw/winsw, MIT) wraps the jar as a Windows
+  # Service. The .NET 4.6.1 build is ~650 KB and runs on the .NET Framework
+  # that ships with Windows Server 2016 / Windows 10 1607 and later. Servers
+  # without it need the self-contained WinSW-x64.exe instead - see
+  # docs/INSTALL.md.
+  WINSW_VERSION: v2.12.0
+  WINSW_ASSET: WinSW.NET461.exe
+
+jobs:
+  package:
+    name: Build and publish packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v4
+        with:
+          # Full history so the tag's commit can be checked against main below.
+          fetch-depth: 0
+
+      - name: Verify the tag is on main
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --quiet origin +refs/heads/main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME points at $GITHUB_SHA, which is not an ancestor of main. Release tags must be created on main."
+            exit 1
+          fi
+          echo "$GITHUB_REF_NAME is on main."
+
+      - name: Determine the version
+        id: version
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION='${{ inputs.version }}'
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          # Reject anything Maven or a filename would choke on, and catch typos
+          # like "v1.2" or "release-1.2.3" before a half-built package ships.
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::'$VERSION' is not a valid version. Tag releases as vMAJOR.MINOR.PATCH, optionally with a pre-release suffix (v1.2.3, v1.2.3-rc1)."
+            exit 1
+          fi
+          # A pre-release suffix (v1.2.3-rc1) marks the GitHub Release as a
+          # pre-release so it is not served as "latest".
+          case "$VERSION" in
+            *-*) PRERELEASE=true ;;
+            *)   PRERELEASE=false ;;
+          esac
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "Building version $VERSION (prerelease=$PRERELEASE)"
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # The repository is maintained on Windows with core.fileMode=false, so
+      # mvnw and the packaging scripts are stored without the executable bit and
+      # would fail here with "Permission denied".
+      - name: Make the build scripts executable
+        run: chmod +x mvnw packaging/assemble.sh
+
+      - name: Stamp the version into the pom
+        run: |
+          set -euo pipefail
+          ./mvnw -B -ntp \
+            org.codehaus.mojo:versions-maven-plugin:2.16.2:set \
+            -DnewVersion='${{ steps.version.outputs.version }}' \
+            -DgenerateBackupPoms=false
+
+      - name: Build and test
+        run: ./mvnw -B -ntp clean package
+
+      - name: Assemble the packages
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: bash packaging/assemble.sh
+
+      - name: Upload the packages as workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jasper-report-service-${{ steps.version.outputs.version }}-packages
+          path: |
+            build/dist/*.zip
+            build/dist/*.tar.gz
+            build/dist/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Publish the GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          NOTES_FILE="$RUNNER_TEMP/release-notes.md"
+          cat > "$NOTES_FILE" <<EOF
+          ## Install packages
+
+          | Package | Install on |
+          | --- | --- |
+          | \`jasper-report-service-$VERSION-windows.zip\` | Windows Server / Windows 10-11, as a Windows Service (WinSW bundled) |
+          | \`jasper-report-service-$VERSION-linux.tar.gz\` | Linux, as a systemd service |
+
+          Both need **Java 21** and a reachable **SQL Server** on the target machine.
+
+          Installation, upgrade and uninstall instructions: [docs/INSTALL.md](https://github.com/${{ github.repository }}/blob/$GITHUB_REF_NAME/docs/INSTALL.md)
+
+          Verify a download against \`SHA256SUMS.txt\` before installing.
+          EOF
+
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file "$NOTES_FILE" \
+            --target "$GITHUB_SHA" \
+            ${{ steps.version.outputs.prerelease == 'true' && '--prerelease' || '--latest' }} \
+            build/dist/jasper-report-service-"$VERSION"-windows.zip \
+            build/dist/jasper-report-service-"$VERSION"-linux.tar.gz \
+            build/dist/SHA256SUMS.txt
