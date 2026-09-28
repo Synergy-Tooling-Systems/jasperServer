@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies xmlns="http://jasperreports.sourceforge.net/jasperreports/fonts"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/fonts http://jasperreports.sourceforge.net/xsd/fonts.xsd">
+    <fontFamily name="SynergyAriel">
+        <normal>fonts/synergyariel/SynergyAriel.ttf</normal>
+        <bold>fonts/synergyariel/SynergyArielBold.ttf</bold>
+        <italic>fonts/synergyariel/SynergyArielItalic.ttf</italic>
+        <boldItalic>fonts/synergyariel/SynergyArielBoldItalic.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+</fontFamilies>
