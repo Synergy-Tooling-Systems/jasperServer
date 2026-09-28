@@ -2,11 +2,11 @@
 <fontFamilies xmlns="http://jasperreports.sourceforge.net/jasperreports/fonts"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/fonts http://jasperreports.sourceforge.net/xsd/fonts.xsd">
-    <fontFamily name="SynergyAriel">
-        <normal>fonts/synergyariel/SynergyAriel.ttf</normal>
-        <bold>fonts/synergyariel/SynergyArielBold.ttf</bold>
-        <italic>fonts/synergyariel/SynergyArielItalic.ttf</italic>
-        <boldItalic>fonts/synergyariel/SynergyArielBoldItalic.ttf</boldItalic>
+    <fontFamily name="SynergyArial">
+        <normal>fonts/synergyarial/SynergyArial.ttf</normal>
+        <bold>fonts/synergyarial/SynergyArialBold.ttf</bold>
+        <italic>fonts/synergyarial/SynergyArialItalic.ttf</italic>
+        <boldItalic>fonts/synergyarial/SynergyArialBoldItalic.ttf</boldItalic>
         <pdfEncoding>Identity-H</pdfEncoding>
         <pdfEmbedded>true</pdfEmbedded>
     </fontFamily>
