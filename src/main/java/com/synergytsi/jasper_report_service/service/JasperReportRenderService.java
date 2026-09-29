@@ -87,8 +87,19 @@ public class JasperReportRenderService {
      * @return the rendered PDF bytes
      */
     public byte[] renderPdf(Path reportPath, Map<String, Object> parameters) {
+        return renderPdf(reportsDirectory, reportPath, parameters);
+    }
+
+    /**
+     * Same as {@link #renderPdf(Path, Map)}, but with subreports resolved within
+     * {@code reportsDirectory} instead of the configured one, e.g. the dev reports directory.
+     *
+     * @param reportsDirectory the directory the report was resolved in
+     */
+    public byte[] renderPdf(Path reportsDirectory, Path reportPath, Map<String, Object> parameters) {
         try {
-            JasperReport jasperReport = new Compilation(parameters).compile(reportPath, List.of());
+            JasperReport jasperReport = new Compilation(reportsDirectory.toAbsolutePath().normalize(), parameters)
+                    .compile(reportPath, List.of());
             JasperPrint jasperPrint = dataSource != null
                     ? fillWithConnection(jasperReport, parameters)
                     : JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
@@ -122,7 +133,10 @@ public class JasperReportRenderService {
      * live once {@code reports.directory} points somewhere else. References that resolve to nothing
      * inside the reports directory are left alone for JasperReports to handle as before.
      */
-    private final class Compilation {
+    private static final class Compilation {
+
+        /** The directory subreports must resolve within. */
+        private final Path reportsDirectory;
 
         /** The parameter map the report will be filled with; compiled subreports are added to it. */
         private final Map<String, Object> fillParameters;
@@ -132,7 +146,8 @@ public class JasperReportRenderService {
 
         private int subreportCount;
 
-        private Compilation(Map<String, Object> fillParameters) {
+        private Compilation(Path reportsDirectory, Map<String, Object> fillParameters) {
+            this.reportsDirectory = reportsDirectory;
             this.fillParameters = fillParameters;
         }
 

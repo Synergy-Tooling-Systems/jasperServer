@@ -93,6 +93,7 @@ Renders one report to PDF.
 | Header | Value |
 | --- | --- |
 | `Content-Type` | `application/json` — anything else is rejected with `415` and an empty body |
+| `mode` | Optional. `dev` (case-insensitive) reads the report, and its subreports, from the server's dev reports directory instead of the regular one. Any other value, or no header, uses the regular directory. If the server has no dev directory configured, `dev` is rejected with `400`. |
 
 **Request body**
 

@@ -11,3 +11,8 @@ server.port=8080
 # Directory .jrxml report files are read from, relative to the working
 # directory the service is started from.
 #reports.directory=./reports
+
+# Directory .jrxml report files are read from instead when a render request
+# sends the header "mode: dev". Unset by default, in which case such requests
+# are rejected.
+#reports.devDirectory=./reportsDev

@@ -76,6 +76,8 @@ The server also has to be reachable, whatever the report does. Every render open
 
 `.jrxml` files are read by name from the directory configured by `reports.directory` (default `./reports`, relative to the working directory the app is started from, and overridable in `config/service.properties` like the port). Drop report definitions there — the render endpoint refers to them by filename only.
 
+A second directory, `reports.devDirectory`, can be configured the same way for reports still in development. A render request that sends the header `mode: dev` reads the report and its subreports from there instead, with no fallback to `reports.directory`. It is unset by default, and `mode: dev` requests then fail with `400`.
+
 ## Subreports
 
 A report can pull in another report through `<subreportExpression>`. Reference the `.jrxml` file directly — the service compiles subreports per request, exactly as it does the main report, so there are no `.jasper` files to generate or keep in sync:

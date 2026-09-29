@@ -59,4 +59,31 @@ class ReportControllerTest {
                         .content("{\"reportFileName\":\"../pom.jrxml\"}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void devModeHeaderReadsFromDevReportsDirectory() throws Exception {
+        mockMvc.perform(post("/api/reports/render")
+                        .header("mode", "dev")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reportFileName\":\"dev-only.jrxml\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_PDF));
+    }
+
+    @Test
+    void withoutDevModeHeaderDevReportsAreNotFound() throws Exception {
+        mockMvc.perform(post("/api/reports/render")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reportFileName\":\"dev-only.jrxml\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void devModeHeaderDoesNotFallBackToReportsDirectory() throws Exception {
+        mockMvc.perform(post("/api/reports/render")
+                        .header("mode", "dev")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reportFileName\":\"blank.jrxml\"}"))
+                .andExpect(status().isBadRequest());
+    }
 }
